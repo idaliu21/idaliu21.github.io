@@ -1,6 +1,7 @@
 
 var mic, fft, amp,grid;
 
+
 // save this file as sketch.js
 // Sketch One
 var canvas1 = function( p ) { // p could be any variable name
@@ -54,7 +55,7 @@ var t = function( p ) {
         p.stroke(255);
         p.strokeWeight(2);
         var level = amp.getLevel();
-        var size = p.map(level, 0, 1, 0, 600);
+        var size = p.map(level, 0, 0.1, 0, 600);
         p.ellipse(p.width/2, p.height/2, size, size);
         p.textAlign(p.CENTER, p.CENTER);
         p.textSize(32);
@@ -91,7 +92,7 @@ var canvas3 = function( p ) { // p could be any variable name
 
 
         this.update = function(level){
-            this.lineNum = p.map(level, 0, 0.6, 14, 1);
+            this.lineNum = p.map(level, 0, 0.1, 14, 5);
             this.spacingX = p.width/this.lineNum;
             this.spacingY = p.height/this.lineNum;
         }
