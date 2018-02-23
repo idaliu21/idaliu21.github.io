@@ -1,242 +1,256 @@
 
+var mic, fft, amp,grid;
 
-d3.csv("data/sound_data2.csv", function(data){
+// save this file as sketch.js
+// Sketch One
+var canvas1 = function( p ) { // p could be any variable name
+    p.setup = function() {
+        p.createCanvas(500,300);
+        p.noFill();
 
+        mic = new p5.AudioIn();
+        mic.start();
+        fft = new p5.FFT(0.99,1024);
+        fft.setInput(mic);
+    };
 
-    // Analyze the dataset in the web console
-    changeNumber(data);
-    window.data = data;
-
-    console.log(data);
-    init();
-    animate();
-});
-
-function changeNumber(data){
-    var counttime = 0;
-    var countfreq = 0;
-    data.forEach(function(element){
-        //var parseTime = d3.timeParse("%Y-%m-%d");
-        //element[0] = +element[0];
-
-        element["frequency"] =+element["frequency"];
-        counttime+=1;
-        countfreq = 0;
-        for (var i = 0; i < 14.9; i=i+0.1) {
-            countfreq +=1;
+    p.draw = function() {
+        p.background(55);
+        //fill(255);
+        p.stroke(255);
 
 
 
+        var spectrum = fft.analyze();
+        //console.log(spectrum);
 
-            element[i.toFixed(1)] = + element[i.toFixed(1)];
+        p.beginShape();
+        for (i = 0; i<spectrum.length; i++) {
+            p.vertex(i, p.map(spectrum[i], 0, 255, p.height, 0) );
+        }
+        p.endShape();
+    };
+};
+var myp5 = new p5(canvas1, 'c1');
 
-            //console.log(i.toFixed(1));
+// Sketch Two
+var t = function( p ) {
+    var x = 100.0;
+    var y = 100;
+    var speed = 2.5;
+    p.setup = function() {
+        p.createCanvas(500,300);
+        p.noFill();
 
+        mic = new p5.AudioIn();
+        mic.start();
+        amp = new p5.Amplitude(0.99);
+        amp.setInput(mic);
+    };
+
+    p.draw = function() {
+        p.background(55);
+        //fill(255);
+        p.stroke(255);
+        p.strokeWeight(2);
+        var level = amp.getLevel();
+        var size = p.map(level, 0, 1, 0, 600);
+        p.ellipse(p.width/2, p.height/2, size, size);
+        p.textAlign(p.CENTER, p.CENTER);
+        p.textSize(32);
+        p.text(size.toFixed(0), p.width/2, p.height/2);
+
+    };
+};
+var myp5 = new p5(t, 'c2');
+
+var canvas3 = function( p ) { // p could be any variable name
+
+    p.setup = function() {
+        p.createCanvas(500,300);
+        p.noFill();
+
+        mic = new p5.AudioIn();
+        mic.start();
+        amp = new p5.Amplitude(0.99);
+        amp.setInput(mic);
+        grid = new Grid();
+    };
+
+    p.draw = function() {
+        p.background(55);
+        //fill(255);
+        p.stroke(255);
+        var level = amp.getLevel();
+        grid.update(level);
+        grid.display();
+
+    };
+
+    function Grid(){
+
+
+        this.update = function(level){
+            this.lineNum = p.map(level, 0, 0.6, 14, 1);
+            this.spacingX = p.width/this.lineNum;
+            this.spacingY = p.height/this.lineNum;
         }
 
+        this.display = function(){
 
-
-        // element.date = parseTime(element.date)
-    });
-    console.log(counttime);
-    console.log(countfreq);
-
-}
-
-
-
-var SEPARATION = 100, AMOUNTX = 146, AMOUNTY = 150;
-
-var container, stats;
-var camera, scene, renderer;
-
-var particles, particle, count = 0;
-
-var mouseX = 0, mouseY = 0;
-
-var windowHalfX = window.innerWidth / 2;
-var windowHalfY = window.innerHeight / 2;
-
-
-function init() {
-
-    container = document.createElement( 'div' );
-    document.body.appendChild( container );
-
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-    camera.position.z = 1000;
-
-    scene = new THREE.Scene();
-
-    particles = new Array();
-
-    var PI2 = Math.PI * 2;
-    var material = new THREE.SpriteCanvasMaterial( {
-
-        color: 0xffffff,
-        program: function ( context ) {
-
-            context.beginPath();
-            context.arc( 0, 0, 0.5, 0, PI2, true );
-            context.fill();
+            //console.log(level);
+            p.stroke(255);
+            p.strokeWeight(5);
+            for(var i=0; i<this.lineNum ; i++){
+                p.line(this.spacingX*i, p.height, this.spacingX*i, 0 );
+                //p.line(0, this.spacingY*i, p.width, this.spacingY*i)
+            }
 
         }
+    }
+};
 
-    } );
+var myp5 = new p5(canvas3, 'c3');
 
-    var i = 0;
 
-    for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+var osc, ftt2;
+// Sketch Four
+var canvas4 = function( p ) {
 
-        for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+    p.setup = function() {
+        p.createCanvas(500,300);
+        p.noFill();
 
-            particle = particles[ i ++ ] = new THREE.Sprite( material );
-            particle.position.x = ix * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 );
-            particle.position.z = iy * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 );
-            scene.add( particle );
+        mic = new p5.AudioIn();
+        mic.start();
+        amp = new p5.Amplitude(0.99);
+        amp.setInput(mic);
+        osc = new p5.TriOsc(); // set frequency and type
+        osc.amp(.5);
 
+        fft2 = new p5.FFT();
+        osc.start();
+    };
+
+    p.draw = function() {
+        p.background(55);
+        //fill(255);
+        p.stroke(255);
+        p.strokeWeight(2);
+        var level = amp.getLevel();
+
+        var waveform = fft2.waveform();  // analyze the waveform
+        p.beginShape();
+        p.strokeWeight(5);
+        for (var i = 0; i < waveform.length; i++){
+            var x = p.map(i, 0, waveform.length, 0, p.width);
+            var y = p.map(waveform[i], -1, 1, p.height, 0);
+            p.vertex(x, y);
         }
+        p.endShape();
 
-    }
+        // change oscillator frequency based on mouseX
+        var freq = p.map(level, 0, 1, 40, 880);
+        osc.freq(freq);
+        osc.amp(amp);
 
-    renderer = new THREE.CanvasRenderer();
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    container.appendChild( renderer.domElement );
+    };
+};
+var myp5 = new p5(canvas4, 'c4');
 
-    stats = new Stats();
-    container.appendChild( stats.dom );
-
-    document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-    document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-    document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-
-    //
-
-    window.addEventListener( 'resize', onWindowResize, false );
-
-}
-
-function onWindowResize() {
-
-    windowHalfX = window.innerWidth / 2;
-    windowHalfY = window.innerHeight / 2;
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize( window.innerWidth, window.innerHeight );
-
-}
-
-//
-
-function onDocumentMouseMove( event ) {
-
-    mouseX = event.clientX - windowHalfX;
-    mouseY = event.clientY - windowHalfY;
-
-}
-
-function onDocumentTouchStart( event ) {
-
-    if ( event.touches.length === 1 ) {
-
-        event.preventDefault();
-
-        mouseX = event.touches[ 0 ].pageX - windowHalfX;
-        mouseY = event.touches[ 0 ].pageY - windowHalfY;
-
-    }
-
-}
-
-function onDocumentTouchMove( event ) {
-
-    if ( event.touches.length === 1 ) {
-
-        event.preventDefault();
-
-        mouseX = event.touches[ 0 ].pageX - windowHalfX;
-        mouseY = event.touches[ 0 ].pageY - windowHalfY;
-
-    }
-
-}
-
-//
-
-function animate() {
-
-    requestAnimationFrame( animate );
-
-    render();
-    stats.update();
-
-}
-
-function render() {
-
-    camera.position.x += ( mouseX - camera.position.x ) * .05;
-    camera.position.y += ( - mouseY - camera.position.y ) * .05;
-    camera.lookAt( scene.position );
-
-    var i = 0;
-
-    for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
-
-        var ixx = (ix+count)%AMOUNTX;
-        //console.log (ixx);
-
-        for ( var iy = 0; iy < 14.9; iy+=0.1 ) {
-
-            particle = particles[ i++ ];
-            //particle.position.y = ( Math.sin( ( ix  ) * 0.3 ) * 50 ) + ( Math.sin( ( iy  ) * 0.5 ) * 50 );
-            //onsole.log(( Math.sin( ( ix  ) * 0.3 ) * 50 ) + ( Math.sin( ( iy  ) * 0.5 ) * 50 ));
-            //console.log(iy.toFixed(1).toString());
-            //console.log(100*window.data[ix][iy.toFixed(1).toString()]);
-            //console.log (ixx);
-
-
-            particle.position.y = 100*window.data[(ixx)][iy.toFixed(1).toString()];
-            particle.scale.x = particle.scale.y =10;
-
-        }
-
-    }
-
-    renderer.render( scene, camera );
-
-    count += 1;
-
-}
 
 /*
-function render() {
 
-    camera.position.x += ( mouseX - camera.position.x ) * 0.05;
-    camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
-    camera.lookAt( scene.position );
+function setup() {
+    createCanvas(720, 256);
 
-    var i = 0;
-    for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+    osc = new p5.TriOsc(); // set frequency and type
+    osc.amp(.5);
 
-        for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+    fft = new p5.FFT();
+    osc.start();
+}
 
-            particle = particles[ i++ ];
+function draw() {
+    background(255);
 
-            particle.position.y = 100*window.data[ix][iy.toFixed(1).toString()];
-            particle.scale.x = particle.scale.y = 10;
+    var waveform = fft.waveform();  // analyze the waveform
+    beginShape();
+    strokeWeight(5);
+    for (var i = 0; i < waveform.length; i++){
+        var x = map(i, 0, waveform.length, 0, width);
+        var y = map(waveform[i], -1, 1, height, 0);
+        vertex(x, y);
+    }
+    endShape();
 
+    // change oscillator frequency based on mouseX
+    var freq = map(mouseX, 0, width, 40, 880);
+    osc.freq(freq);
+
+    var amp = map(mouseY, 0, height, 1, .01);
+    osc.amp(amp);
+}
+
+function setup() {
+    var canvas1 = createCanvas(600,300);
+    noFill();
+
+    mic = new p5.AudioIn();
+    mic.start();
+        fft = new p5.FFT(0.99,1024);
+    fft.setInput(mic);
+    amp = new p5.Amplitude(0.99);
+    amp.setInput(mic);
+    grid = new Grid();
+}
+
+function draw() {
+    background(55);
+    //fill(255);
+    stroke(255);
+    strokeWeight(2);
+    var level = amp.getLevel();
+    var size = map(level, 0, 1, 0, 600);
+    ellipse(width/2, height/2, size, size);
+
+    grid.update(level);
+    grid.display();
+
+
+    var spectrum = fft.analyze();
+    console.log(spectrum);
+    beginShape();
+
+    var index = 0;
+    for (i = 0; i<spectrum.length; i++) {
+        index =
+        vertex(i, map(spectrum[i], 0, 255, height, 0) );
+    }
+    endShape();
+}
+
+
+
+
+
+function Grid(){
+
+
+    this.update = function(level){
+        this.lineNum = map(level, 0, 1, 14, 4);
+        this.spacing = width/this.lineNum;
+    }
+
+    this.display = function(){
+
+        //console.log(level);
+        stroke(255);
+        strokeWeight(2);
+        for(var i=0; i<this.lineNum ; i++){
+            line(this.spacing*i, height, this.spacing*i, 0 );
         }
 
     }
-
-    renderer.render( scene, camera );
-
-    count += 0.1;
-
 }
-
 */
-
