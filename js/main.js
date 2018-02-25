@@ -1,25 +1,37 @@
 
 var mic, fft, amp,grid;
 
+var osc, ftt2;
 
-// save this file as sketch.js
+
 // Sketch One
 var canvas1 = function( p ) { // p could be any variable name
     p.setup = function() {
-        p.createCanvas(500,300);
+        p.createCanvas(1024,300);
         p.noFill();
 
         mic = new p5.AudioIn();
         mic.start();
         fft = new p5.FFT(0.99,1024);
         fft.setInput(mic);
+
+        osc = new p5.TriOsc(); // set frequency and type
+        osc.amp(.5);
+
+        fft2 = new p5.FFT();
+        osc.start();
+
+        amp = new p5.Amplitude(0.6);
+        amp.setInput(mic);
     };
 
     p.draw = function() {
         p.background(55);
         //fill(255);
         p.stroke(255);
+        var divide =350;
 
+        p.line(divide, p.height, divide, 0);
 
 
         var spectrum = fft.analyze();
@@ -30,12 +42,49 @@ var canvas1 = function( p ) { // p could be any variable name
             p.vertex(i, p.map(spectrum[i], 0, 255, p.height, 0) );
         }
         p.endShape();
+
+
+
+        var waveNum = 0;
+
+        for (i = divide; i<spectrum.length; i++){
+            waveNum += spectrum[i];
+        }
+
+        // change oscillator frequency based on mouseX
+        var freq;
+
+        /*
+        if (waveNum ===0){
+            freq =0;
+
+        }else{
+            freq= p.map(waveNum, 1,400, 19, 9);
+        }
+        */
+
+
+        var level = amp.getLevel();
+        //console.log(level);
+        if(level<0.115){
+            freq = 0;
+        }else{
+            freq= p.map(level, 1,0.2, 19, 9);
+
+        }
+
+        console.log(freq);
+        osc.freq(freq);
+        osc.amp(1);
+
     };
 };
 var myp5 = new p5(canvas1, 'c1');
 
+/*
+
 // Sketch Two
-var t = function( p ) {
+var canvas2 = function( p ) {
     var x = 100.0;
     var y = 100;
     var speed = 2.5;
@@ -55,7 +104,7 @@ var t = function( p ) {
         p.stroke(255);
         p.strokeWeight(2);
         var level = amp.getLevel();
-        var size = p.map(level, 0, 0.7, 100, 500);
+        var size = p.map(level, 0, 0.1, 0, 600);
         p.ellipse(p.width/2, p.height/2, size, size);
         p.textAlign(p.CENTER, p.CENTER);
         p.textSize(32);
@@ -63,7 +112,12 @@ var t = function( p ) {
 
     };
 };
-var myp5 = new p5(t, 'c2');
+var myp5 = new p5(canvas2, 'c2');
+
+
+
+
+//sketch3
 
 var canvas3 = function( p ) { // p could be any variable name
 
@@ -92,7 +146,7 @@ var canvas3 = function( p ) { // p could be any variable name
 
 
         this.update = function(level){
-            this.lineNum = p.map(level, 0, 0.7, 14, 5);
+            this.lineNum = p.map(level, 0, 0.1, 14, 5);
             this.spacingX = p.width/this.lineNum;
             this.spacingY = p.height/this.lineNum;
         }
@@ -114,6 +168,8 @@ var canvas3 = function( p ) { // p could be any variable name
 var myp5 = new p5(canvas3, 'c3');
 
 
+
+
 var osc, ftt2;
 // Sketch Four
 var canvas4 = function( p ) {
@@ -124,7 +180,7 @@ var canvas4 = function( p ) {
 
         mic = new p5.AudioIn();
         mic.start();
-        amp = new p5.Amplitude(0.99);
+        amp = new p5.Amplitude(0.999);
         amp.setInput(mic);
         osc = new p5.TriOsc(); // set frequency and type
         osc.amp(.5);
@@ -149,18 +205,20 @@ var canvas4 = function( p ) {
             p.vertex(x, y);
         }
         p.endShape();
+        line
 
         // change oscillator frequency based on mouseX
-        var freq = p.map(level, 0, 1, 40, 880);
+        var freq = p.map(level, 0.35, 0.5, 19, 9);
         osc.freq(freq);
-        osc.amp(amp);
+        console.log("level"+level+"freq"+freq);
+        osc.amp(1);
 
     };
 };
 var myp5 = new p5(canvas4, 'c4');
 
 
-/*
+
 
 function setup() {
     createCanvas(720, 256);
